@@ -4,4 +4,3 @@ python:
   - "3.6"
 install:
   "python setup.py build"
-  "python setup.py install"
