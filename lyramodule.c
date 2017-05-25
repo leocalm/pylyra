@@ -162,7 +162,7 @@ PyDoc_STRVAR(module_doc,
 "This is a template module just for instruction.");
 
 /* Initialization function for the module (*must* be called PyInit_pylyra) */
-
+#if PY_MAJOR_VERSION >= 3
 static struct PyModuleDef pylyramodule = {
 	PyModuleDef_HEAD_INIT,
 	"pylyra",
@@ -174,9 +174,15 @@ static struct PyModuleDef pylyramodule = {
 	NULL,
 	NULL
 };
+# define INIT_FUNC_NAME PyInit_pylyra
+# define INIT_ERROR     return NULL
+#else
+# define INIT_FUNC_NAME initpylyra
+# define INIT_ERROR     return
+#endif
 
 PyMODINIT_FUNC
-PyInit_pylyra(void)
+INIT_FUNC_NAME(void)
 {
 	PyObject *m = NULL;
 
@@ -188,7 +194,12 @@ PyInit_pylyra(void)
 	Str_Type.tp_base = &PyUnicode_Type;
 
 	/* Create the module and add the functions */
-	m = PyModule_Create(&pylyramodule);
+
+        #if PY_MAJOR_VERSION >= 3
+           m = PyModule_Create(&pylyramodule);
+        #else
+           m = Py_InitModule3("pylyra", pylyra_methods, module_doc);
+        #endif
 	if (m == NULL)
 		goto fail;
 
@@ -213,5 +224,5 @@ PyInit_pylyra(void)
 	return m;
  fail:
 	Py_XDECREF(m);
-	return NULL;
+	INIT_ERROR;
 }
