@@ -13,73 +13,36 @@
    intobject.h for an example. */
 
 #include "Python.h"
-#include "Lyra.h"
+#include "Lyra/Lyra2/src/Lyra2.h"
 
 static PyObject *ErrorObject;
 
 /* --------------------------------------------------------------------- */
 
 /* Function of two integers returning integer */
-
-PyDoc_STRVAR(pylyra_foo_doc,
-"foo(i,j)\n\
-\n\
-Return the sum of i and j.");
-
-static PyObject *
-pylyra_foo(PyObject *self, PyObject *args)
-{
-	long i, j;
-	long res;
-	if (!PyArg_ParseTuple(args, "ll:foo", &i, &j))
-		return NULL;
-	res = i+j; /* PYLYRAX Do something here */
-	return PyLong_FromLong(res);
-}
-
 PyDoc_STRVAR(pylyra_lyra_doc,
-             "foo(i,j)\n\
+"key = lyra(kLen, pwd, salt, tCost, nRows)\n\
 \n\
-Return the sum of i and j.");
+Execute lyra with given parameters and return the key.");
 
 static PyObject *
 pylyra_lyra(PyObject *self, PyObject *args)
 {
-	/* long i, j; */
-	/* long res; */
-	/* if (!PyArg_ParseTuple(args, "ll:foo", &i, &j)) */
-	/* 	return NULL; */
-	/* res = i+j; /\* PYLYRAX Do something here *\/ */
-	/* return PyLong_FromLong(res); */
-
-  int kLen = 64;
-  unsigned char *K = malloc(kLen);
   unsigned char *pwd;
-  int pwdLen = 11;
   unsigned char *salt;
-  int saltLen = 16;
-  int tCost = 5;
-  int nRows = 1024;
-  int result;
-  int countSample = 10;
-  int indexSalt = 0;
-  pwdLen = countSample;
-  int count;
-  pwd = malloc(sizeof (pwd) * pwdLen);
-  for (count = 0; count < pwdLen; count++) {
-    pwd[count] = count;
-  }
+  Py_ssize_t pwdLen;
+  Py_ssize_t saltLen;
+  long kLen;
+  long tCost;
+  long nRows;
 
-  salt = malloc(sizeof (salt) * saltLen);
-  for (count = 0; count < saltLen; count++) {
-    salt[count] = saltLen * indexSalt + count;
-  }
-  indexSalt++;
-  if (indexSalt == saltLen)
-    indexSalt = 0;
- result = lyra(K, kLen, (unsigned char*) pwd, pwdLen, (unsigned char*) salt, saltLen, tCost, nRows, N_COLS);
- /* return PyLong_FromLong(result); */
- return PyBytes_FromString(K);
+  if (!PyArg_ParseTuple(args, "ls#s#ll", &kLen, &pwd, &pwdLen, &salt, &saltLen, &tCost, &nRows))
+    return NULL;
+
+  unsigned char *K = malloc(kLen);
+  int result;
+  result = LYRA2(K, kLen, pwd, pwdLen, salt, saltLen, tCost, nRows, N_COLS);
+  return PyByteArray_FromStringAndSize(K, kLen);
 }
 
 
@@ -191,11 +154,8 @@ static PyTypeObject Null_Type = {
 /* List of functions defined in the module */
 
 static PyMethodDef pylyra_methods[] = {
-	{"foo",		pylyra_foo,		METH_VARARGS,
-	 	pylyra_foo_doc},
-  {"lyra", pylyra_lyra, METH_VARARGS,
-   pylyra_lyra_doc},
-	{NULL,		NULL}		/* sentinel */
+  {"lyra", pylyra_lyra, METH_VARARGS, pylyra_lyra_doc},
+  {NULL, NULL}		/* sentinel */
 };
 
 PyDoc_STRVAR(module_doc,
