@@ -13,4 +13,4 @@ install:
   - "pip install pytest"
   - "python setup.py build"
   - "python setup.py install"
-script: pytest
+script: "python -m pytest"
