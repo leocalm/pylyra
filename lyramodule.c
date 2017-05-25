@@ -41,7 +41,7 @@ pylyra_lyra(PyObject *self, PyObject *args)
 
   unsigned char *K = malloc(kLen);
   int result;
-  result = LYRA2(K, kLen, pwd, pwdLen, salt, saltLen, tCost, nRows, N_COLS);
+  result = PHS(K, kLen, pwd, pwdLen, salt, saltLen, tCost, nRows);
   return PyByteArray_FromStringAndSize(K, kLen);
 }
 
